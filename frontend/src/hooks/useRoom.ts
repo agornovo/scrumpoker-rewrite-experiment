@@ -88,6 +88,8 @@ export function useRoom(stompSvc: StompService): UseRoomResult {
   }, [stompSvc]);
 
   useEffect(() => {
+    // Run once on mount to attempt reconnection from a saved session.
+    // doJoin is stable (useCallback with [stompSvc]), so including it is safe.
     const savedSession = sessionStorage.getItem(SESSION_KEY);
     if (savedSession) {
       try {
@@ -98,8 +100,7 @@ export function useRoom(stompSvc: StompService): UseRoomResult {
         sessionStorage.removeItem(SESSION_KEY);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [doJoin]);
 
   const joinRoom = useCallback((params: {
     roomId: string;

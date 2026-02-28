@@ -1,4 +1,4 @@
-import { CARD_DECKS, CARD_DISPLAY } from '../../types';
+import { CARD_DECKS, cardDisplay } from '../../types';
 
 interface CardSelectionProps {
   cardSet: string;
@@ -23,9 +23,9 @@ export function CardSelection({ cardSet, selectedVote, revealed, onVote }: CardS
               onClick={() => !revealed && onVote(card)}
               disabled={revealed}
               aria-pressed={isSelected}
-              aria-label={`Vote ${CARD_DISPLAY(card)}`}
+              aria-label={`Vote ${cardDisplay(card)}`}
             >
-              {CARD_DISPLAY(card)}
+              {cardDisplay(card)}
             </button>
           );
         })}

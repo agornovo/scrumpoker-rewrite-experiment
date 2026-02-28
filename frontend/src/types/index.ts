@@ -46,7 +46,7 @@ export const CARD_DECKS: CardDeck[] = [
   { id: 'powers2', name: 'Powers of 2', cards: [1, 2, 4, 8, 16, 32, 64, '?'] },
 ];
 
-export function CARD_DISPLAY(card: number | string): string {
+export function cardDisplay(card: number | string): string {
   if (card === 0.5) return '½';
   return String(card);
 }
