@@ -18,8 +18,18 @@ export function RoundHistory({ roomState }: RoundHistoryProps) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const prevRevealedRef = useRef<boolean>(false);
   const roundRef = useRef<number>(1);
+  const prevRoomIdRef = useRef<string>(roomState.roomId);
 
   useEffect(() => {
+    // Reset history and counter when the user joins a different room
+    if (roomState.roomId !== prevRoomIdRef.current) {
+      prevRoomIdRef.current = roomState.roomId;
+      setHistory([]);
+      roundRef.current = 1;
+      prevRevealedRef.current = roomState.revealed;
+      return;
+    }
+
     const wasRevealed = prevRevealedRef.current;
     const isNowRevealed = roomState.revealed;
 
@@ -37,7 +47,7 @@ export function RoundHistory({ roomState }: RoundHistoryProps) {
       ]);
     }
     prevRevealedRef.current = isNowRevealed;
-  }, [roomState.revealed, roomState.stats, roomState.storyTitle]);
+  }, [roomState.roomId, roomState.revealed, roomState.stats, roomState.storyTitle]);
 
   if (history.length === 0) return null;
 

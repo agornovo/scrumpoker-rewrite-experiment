@@ -10,10 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Room {
 
     public static final Map<String, List<String>> CARD_SETS = Map.of(
-        "standard",  List.of("0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?", "☕"),
-        "fibonacci",  List.of("1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?", "☕"),
-        "tshirt",     List.of("XS", "S", "M", "L", "XL", "XXL", "?", "☕"),
-        "powers2",    List.of("1", "2", "4", "8", "16", "32", "64", "?", "☕")
+        "standard",  List.of("1", "2", "3", "5", "8", "13", "20", "40", "100", "?"),
+        "fibonacci",  List.of("0", "0.5", "1", "2", "3", "5", "8", "13", "21", "34", "55", "?", "☕"),
+        "tshirt",     List.of("XS", "S", "M", "L", "XL", "XXL", "?"),
+        "powers2",    List.of("1", "2", "4", "8", "16", "32", "64", "?")
     );
 
     private final String id;

@@ -420,11 +420,14 @@ public class RoomService {
         return new RoomUpdateMessage.StatsDto(average, median, min, max);
     }
 
+    @Value("${room.cleanup.max.age.seconds:86400}")
+    private long roomCleanupMaxAgeSeconds = 86400;
+
     // ---- Cleanup old rooms --------------------------------------------------
 
     @Scheduled(fixedDelay = 3600000) // every hour
     public synchronized void cleanupOldRooms() {
-        Instant cutoff = Instant.now().minusSeconds(86400); // 24 hours
+        Instant cutoff = Instant.now().minusSeconds(roomCleanupMaxAgeSeconds);
         rooms.entrySet().removeIf(entry -> {
             if (entry.getValue().getCreatedAt().isBefore(cutoff)) {
                 log.info("Cleaning up stale room {}", entry.getKey());
