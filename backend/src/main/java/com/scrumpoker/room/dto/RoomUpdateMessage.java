@@ -1,5 +1,6 @@
 package com.scrumpoker.room.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public class RoomUpdateMessage {
@@ -35,6 +36,7 @@ public class RoomUpdateMessage {
         public void setName(String name) { this.name = name; }
         public Object getVote() { return vote; }
         public void setVote(Object vote) { this.vote = vote; }
+        @JsonProperty("isObserver")
         public boolean isObserver() { return isObserver; }
         public void setObserver(boolean observer) { isObserver = observer; }
     }

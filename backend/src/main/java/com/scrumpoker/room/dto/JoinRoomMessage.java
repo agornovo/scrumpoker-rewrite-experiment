@@ -1,5 +1,7 @@
 package com.scrumpoker.room.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class JoinRoomMessage {
     private String roomId;
     private String userName;
@@ -12,7 +14,9 @@ public class JoinRoomMessage {
     public void setRoomId(String roomId) { this.roomId = roomId; }
     public String getUserName() { return userName; }
     public void setUserName(String userName) { this.userName = userName; }
+    @JsonProperty("isObserver")
     public boolean isObserver() { return isObserver; }
+    @JsonProperty("isObserver")
     public void setObserver(boolean observer) { isObserver = observer; }
     public String getCardSet() { return cardSet; }
     public void setCardSet(String cardSet) { this.cardSet = cardSet; }

@@ -196,17 +196,19 @@ public class RoomService {
         if (room == null) return;
         if (!room.getCreatorId().equals(requestorSessionId)) return;
 
-        RoomUser target = room.findUserBySessionId(participantId);
+        // Accept both clientId (public UI identifier) and sessionId (internal)
+        RoomUser target = room.findUserByClientId(participantId);
+        if (target == null) target = room.findUserBySessionId(participantId);
         if (target == null) return;
 
         room.getUsers().remove(target);
-        sessionToRoom.remove(participantId);
+        sessionToRoom.remove(target.getId());
         if (target.getClientId() != null) {
             room.getClientIdToSessionId().remove(target.getClientId());
         }
 
-        // Notify the removed user
-        messagingTemplate.convertAndSendToUser(participantId, "/queue/events",
+        // Notify using the session ID (required for STOMP user-destination routing)
+        messagingTemplate.convertAndSendToUser(target.getId(), "/queue/events",
                 Map.of("type", "removed-from-room", "roomId", roomId));
 
         broadcastRoomUpdate(room);
@@ -364,7 +366,15 @@ public class RoomService {
         RoomUpdateMessage msg = new RoomUpdateMessage();
         msg.setRoomId(room.getId());
         msg.setRevealed(room.isRevealed());
-        msg.setCreatorId(room.getCreatorId());
+
+        // Expose clientId (stable, persistent) as the public creator identifier so the
+        // frontend can compare it against the locally-stored clientId to determine isHost.
+        RoomUser creator = room.findUserBySessionId(room.getCreatorId());
+        String publicCreatorId = (creator != null && creator.getClientId() != null)
+                ? creator.getClientId()
+                : room.getCreatorId();
+        msg.setCreatorId(publicCreatorId);
+
         msg.setCardSet(room.getCardSet());
         msg.setStoryTitle(room.getStoryTitle());
         msg.setAutoReveal(room.isAutoReveal());
@@ -372,13 +382,15 @@ public class RoomService {
 
         List<RoomUpdateMessage.UserDto> userDtos = room.getUsers().stream()
                 .map(u -> {
+                    // Return clientId as the public user ID for stable cross-reconnect identity
+                    String publicId = (u.getClientId() != null) ? u.getClientId() : u.getId();
                     Object vote;
                     if (room.isRevealed()) {
                         vote = u.getActualVote();
                     } else {
                         vote = (u.getActualVote() != null) ? "voted" : null;
                     }
-                    return new RoomUpdateMessage.UserDto(u.getId(), u.getName(), vote, u.isObserver());
+                    return new RoomUpdateMessage.UserDto(publicId, u.getName(), vote, u.isObserver());
                 })
                 .collect(Collectors.toList());
         msg.setUsers(userDtos);

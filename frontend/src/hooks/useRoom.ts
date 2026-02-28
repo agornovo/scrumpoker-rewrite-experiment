@@ -59,7 +59,17 @@ export function useRoom(stompSvc: StompService): UseRoomResult {
         setConnecting(false);
         stompSvc.subscribe(`/topic/room/${session.roomId}`, (msg) => {
           const update: RoomUpdate = JSON.parse(msg.body);
-          setRoomState(update);
+          // Detect removal: if the current user is no longer in the users list
+          const stillInRoom = update.users.some(u => u.id === session.clientId);
+          if (!stillInRoom) {
+            sessionStorage.removeItem(SESSION_KEY);
+            setRemovedFromRoom(true);
+            setRoomState(null);
+            setConnected(false);
+            stompSvc.disconnect();
+          } else {
+            setRoomState(update);
+          }
         });
         stompSvc.subscribe('/user/queue/events', (msg) => {
           const event = JSON.parse(msg.body) as { type: string };

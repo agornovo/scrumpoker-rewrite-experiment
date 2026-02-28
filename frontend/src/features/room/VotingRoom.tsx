@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { RoomUpdate } from '../../types';
 import type { UseRoomResult } from '../../hooks/useRoom';
 import { ParticipantList } from './ParticipantList';
@@ -31,10 +31,32 @@ export function VotingRoom({ roomState, clientId, theme, palette, onThemeToggle,
   const [storyInput, setStoryInput] = useState(roomState.storyTitle);
   const [copied, setCopied] = useState(false);
 
+  // Sync the story input when the server clears it (e.g., after reset round)
+  useEffect(() => {
+    setStoryInput(roomState.storyTitle);
+  }, [roomState.storyTitle]);
+  // Track the locally-selected card value for immediate UI feedback.
+  // The server only returns "voted" (masked) before reveal, not the actual value.
+  const [localVote, setLocalVote] = useState<string | number | null>(null);
+  const prevRevealedRef = useRef(roomState.revealed);
+  useEffect(() => {
+    // Reset local vote when the round is reset (revealed transitions false → after being true)
+    if (prevRevealedRef.current && !roomState.revealed) {
+      setLocalVote(null);
+    }
+    prevRevealedRef.current = roomState.revealed;
+  }, [roomState.revealed]);
+
   const isHost = roomState.creatorId === clientId;
   const currentUser = roomState.users.find(u => u.id === clientId);
-  const myVote = currentUser?.vote ?? null;
   const isObserver = currentUser?.isObserver ?? false;
+  // Show locally-selected value before reveal; show server value (actual) after reveal
+  const selectedVote = roomState.revealed ? (currentUser?.vote ?? null) : localVote;
+
+  const handleVote = useCallback((card: string | number) => {
+    setLocalVote(card);
+    actions.castVote(card);
+  }, [actions]);
 
   const handleStoryBlur = useCallback(() => {
     actions.setStoryTitle(storyInput);
@@ -139,9 +161,9 @@ export function VotingRoom({ roomState, clientId, theme, palette, onThemeToggle,
       {!isObserver && (
         <CardSelection
           cardSet={roomState.cardSet}
-          selectedVote={myVote}
+          selectedVote={selectedVote}
           revealed={roomState.revealed}
-          onVote={actions.castVote}
+          onVote={handleVote}
         />
       )}
 

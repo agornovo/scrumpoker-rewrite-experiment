@@ -85,7 +85,9 @@ describe('useRoom', () => {
       result.current.joinRoom({ roomId: 'r1', userName: 'Alice', isObserver: false, cardSet: 'standard', specialEffects: true });
     });
     act(() => { getConnectCallback()(); });
-    const roomUpdate = { roomId: 'r1', users: [], revealed: false, stats: null, creatorId: 'u1', cardSet: 'standard', storyTitle: '', autoReveal: false, specialEffects: true };
+    // Include the current user in the update so removal detection does not trigger
+    const clientId = result.current.clientId;
+    const roomUpdate = { roomId: 'r1', users: [{ id: clientId, name: 'Alice', vote: null, isObserver: false }], revealed: false, stats: null, creatorId: clientId, cardSet: 'standard', storyTitle: '', autoReveal: false, specialEffects: true };
     act(() => { getSubscribeCallback(0)(makeMsg(roomUpdate)); });
     expect(result.current.roomState).toEqual(roomUpdate);
   });
