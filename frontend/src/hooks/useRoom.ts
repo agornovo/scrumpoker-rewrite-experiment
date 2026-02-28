@@ -63,7 +63,7 @@ export function useRoom(stompSvc: StompService): UseRoomResult {
         });
         stompSvc.subscribe('/user/queue/events', (msg) => {
           const event = JSON.parse(msg.body) as { type: string };
-          if (event.type === 'removed-from-room' || event.type === 'host-absent') {
+          if (event.type === 'removed-from-room') {
             sessionStorage.removeItem(SESSION_KEY);
             setRemovedFromRoom(true);
             setRoomState(null);

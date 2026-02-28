@@ -40,26 +40,22 @@ export function VotingRoom({ roomState, clientId, theme, palette, onThemeToggle,
     actions.setStoryTitle(storyInput);
   }, [storyInput, actions]);
 
-  const handleCopy = useCallback(async () => {
+  const copyToClipboard = useCallback(async (text: string) => {
     try {
-      await navigator.clipboard.writeText(roomState.roomId);
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // fallback: no-op
     }
-  }, [roomState.roomId]);
+  }, []);
 
-  const handleCopyLink = useCallback(async () => {
+  const handleCopy = useCallback(() => copyToClipboard(roomState.roomId), [copyToClipboard, roomState.roomId]);
+
+  const handleCopyLink = useCallback(() => {
     const url = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(roomState.roomId)}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // fallback: no-op
-    }
-  }, [roomState.roomId]);
+    return copyToClipboard(url);
+  }, [copyToClipboard, roomState.roomId]);
 
   const hostPresent = roomState.users.some(u => u.id === roomState.creatorId);
 
