@@ -1,0 +1,24 @@
+# Backend build artifacts
+backend/target/
+backend/src/main/resources/static/
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# Root E2E dependencies
+node_modules/
+package-lock.json
+
+# Playwright artifacts
+playwright-report/
+playwright-results/
+test-results/
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+*.swp
+*.swo

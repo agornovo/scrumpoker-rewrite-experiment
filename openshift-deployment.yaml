@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scrumpoker
+  labels:
+    app: scrumpoker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scrumpoker
+  template:
+    metadata:
+      labels:
+        app: scrumpoker
+    spec:
+      containers:
+      - name: scrumpoker
+        # Replace 'latest' with a specific image tag (e.g. v1.0.0 or a commit SHA) for production deployments
+        image: scrumpoker:latest
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "8080"
+        - name: SERVER_PORT
+          value: "8080"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scrumpoker
+  labels:
+    app: scrumpoker
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: scrumpoker
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: scrumpoker
+  labels:
+    app: scrumpoker
+spec:
+  to:
+    kind: Service
+    name: scrumpoker
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
